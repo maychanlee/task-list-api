@@ -1,6 +1,7 @@
 from flask import Blueprint, abort, make_response, request, Response
 from app.models.task import Task
 from ..db import db
+from sqlalchemy import desc
 from .route_utilities import validate_model, create_model, get_models_with_filters
 
 bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
@@ -13,7 +14,17 @@ def create_task():
 
 @bp.get("")
 def get_all_tasks():
-    return get_models_with_filters(Task, request.args)
+    sort_parameter = request.args.get('sort')
+    query = db.select(Task)
+
+    if sort_parameter == "desc":
+        query = query.order_by(desc(Task.title))
+    else:
+        query = query.order_by(Task.title)
+    
+    tasks = db.session.scalars(query)
+    task_response = [task.to_dict() for task in tasks]
+    return task_response
 
 #get tasks: getting saved tasks
 @bp.get("/<task_id>")
