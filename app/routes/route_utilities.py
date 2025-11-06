@@ -1,5 +1,9 @@
 from flask import abort, make_response
 from ..db import db
+import requests, os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def validate_model(cls, model_id):
     try:
@@ -41,3 +45,19 @@ def get_models_with_filters(cls, filters=None):
     models = db.session.scalars(query.order_by(cls.id))
     models_response = [model.to_dict() for model in models]
     return models_response
+
+def send_slack_bot_message(message):
+    SLACK_API_URL = "https://slack.com/api/chat.postMessage"
+    SLACK_API_TOKEN = os.environ.get("TOKEN")
+
+    headers = {
+        "Content-type": "application/json",
+        "Authorization": f"Bearer {SLACK_API_TOKEN}"
+    }
+
+    body = {
+        "channel": "task-notifications",
+        "text": f"{message}"
+    }
+
+    return requests.post(SLACK_API_URL, headers=headers, json=body)

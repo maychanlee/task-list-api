@@ -1,8 +1,9 @@
-from flask import Blueprint, abort, make_response, request, Response
+from flask import Blueprint, request, Response
 from app.models.task import Task
 from ..db import db
+from datetime import datetime
 from sqlalchemy import desc
-from .route_utilities import validate_model, create_model, get_models_with_filters
+from .route_utilities import validate_model, create_model, get_models_with_filters, send_slack_bot_message
 
 bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -48,6 +49,25 @@ def update_task(task_id):
 def delete_task(task_id):
     task = validate_model(Task, task_id)
     db.session.delete(task)
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
+
+@bp.patch("/<task_id>/mark_complete")
+def patch_task_to_complete(task_id):
+    task = validate_model(Task, task_id)
+    task.completed_at = datetime.now()
+    db.session.commit()
+
+    slack_message = f"Someone just completed the tast {task.title}"
+    send_slack_bot_message(slack_message)
+
+    return Response(status=204, mimetype="application/json")
+
+@bp.patch("/<task_id>/mark_incomplete")
+def patch_task_to_incomplete(task_id):
+    task = validate_model(Task, task_id)
+    task.completed_at = False
     db.session.commit()
 
     return Response(status=204, mimetype="application/json")
