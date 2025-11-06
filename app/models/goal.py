@@ -22,4 +22,8 @@ class Goal(db.Model):
             "id": self.id,
             "title": self.title,
         }
+
+        if self.tasks:
+            goal_dict["tasks"] = [task.to_dict() for task in self.tasks]
+
         return goal_dict

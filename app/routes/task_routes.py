@@ -64,6 +64,6 @@ def patch_task_to_complete(task_id):
 @bp.patch("/<task_id>/mark_incomplete")
 def patch_task_to_incomplete(task_id):
     task = validate_model(Task, task_id)
-    task.completed_at = False
+    task.completed_at = None
     db.session.commit()
     return Response(status=204, mimetype="application/json")
