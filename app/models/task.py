@@ -31,4 +31,8 @@ class Task(db.Model):
             "description": self.description,
             "is_complete": bool(self.completed_at)
         }
+
+        if self.goal_id:
+            task_dict["goal_id"] = self.goal_id
+
         return task_dict
