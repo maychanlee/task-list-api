@@ -7,7 +7,6 @@ from .route_utilities import validate_model, create_model, get_models_with_filte
 
 bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
-#create a task
 @bp.post("")
 def create_task():
     request_body = request.get_json()
@@ -27,7 +26,6 @@ def get_all_tasks():
     task_response = [task.to_dict() for task in tasks]
     return task_response
 
-#get tasks: getting saved tasks
 @bp.get("/<task_id>")
 def get_one_task(task_id):
     task = validate_model(Task, task_id)
@@ -50,7 +48,6 @@ def delete_task(task_id):
     task = validate_model(Task, task_id)
     db.session.delete(task)
     db.session.commit()
-
     return Response(status=204, mimetype="application/json")
 
 @bp.patch("/<task_id>/mark_complete")
@@ -69,5 +66,4 @@ def patch_task_to_incomplete(task_id):
     task = validate_model(Task, task_id)
     task.completed_at = False
     db.session.commit()
-
     return Response(status=204, mimetype="application/json")
